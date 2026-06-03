@@ -1,0 +1,74 @@
+class ColonyGridPowerManager
+{
+    private byte sectorStates = 0;
+
+
+    public void turnOnSector(int sectorIndex)
+    {
+        sectorStates = (byte)(sectorStates | (1 << sectorIndex));
+    }
+
+
+    public void turnOffSector(int sectorIndex)
+    {
+        sectorStates = (byte)(sectorStates & ~(1 << sectorIndex));
+    }
+
+
+    public boolean isSectorOn(int sectorIndex)
+    {
+        return (sectorStates & (1 << sectorIndex)) != 0;
+    }
+
+
+    public void displaySectorStates()
+    {
+        System.out.println("Sector States:");
+
+        for(int i = 7; i >= 0; i--)
+        {
+            if(isSectorOn(i))
+            {
+                System.out.print("1 ");
+            }
+            else
+            {
+                System.out.print("0 ");
+            }
+        }
+
+        System.out.println();
+    }
+}
+
+
+
+public class Main
+{
+    public static void main(String[] args)
+    {
+        ColonyGridPowerManager manager =
+                new ColonyGridPowerManager();
+
+
+        manager.turnOnSector(0);
+        manager.turnOnSector(3);
+        manager.turnOnSector(5);
+
+        manager.displaySectorStates();
+
+
+        System.out.println(
+                "Sector 3 ON? "
+                + manager.isSectorOn(3));
+
+        System.out.println(
+                "Sector 2 ON? "
+                + manager.isSectorOn(2));
+
+
+        manager.turnOffSector(3);
+
+        manager.displaySectorStates();
+    }
+}
