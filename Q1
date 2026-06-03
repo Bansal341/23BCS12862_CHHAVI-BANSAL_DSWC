@@ -1,0 +1,152 @@
+abstract class SpaceVessel
+{
+    protected short shipId;
+    protected boolean operational;
+    protected char fleetClass;
+
+    public SpaceVessel(short shipId,
+                       boolean operational,
+                       char fleetClass)
+    {
+        this.shipId = shipId;
+        this.operational = operational;
+        this.fleetClass = fleetClass;
+    }
+
+    public abstract void displayVesselInfo();
+}
+
+
+
+class MiningShip extends SpaceVessel
+{
+    private float[][] cargoHold;
+    private byte totalBays;
+
+    public MiningShip(short shipId,
+                      boolean operational,
+                      char fleetClass,
+                      byte totalBays,
+                      float[][] cargoHold)
+    {
+        super(shipId, operational, fleetClass);
+
+        this.totalBays = totalBays;
+        this.cargoHold = cargoHold;
+    }
+
+
+    public float calculateTotalOreWeight()
+    {
+        float totalWeight = 0.0f;
+
+        for(int i = 0; i < cargoHold.length; i++)
+        {
+            for(int j = 0; j < cargoHold[i].length; j++)
+            {
+                totalWeight += cargoHold[i][j];
+            }
+        }
+
+        return totalWeight;
+    }
+
+
+    public float findHeaviestContainer()
+    {
+        float maxWeight = cargoHold[0][0];
+
+        for(int i = 0; i < cargoHold.length; i++)
+        {
+            for(int j = 0; j < cargoHold[i].length; j++)
+            {
+                if(cargoHold[i][j] > maxWeight)
+                {
+                    maxWeight = cargoHold[i][j];
+                }
+            }
+        }
+
+        return maxWeight;
+    }
+
+
+    @Override
+    public void displayVesselInfo()
+    {
+        System.out.println("================================");
+
+        System.out.println("Ship ID          : " + shipId);
+        System.out.println("Operational      : " + operational);
+        System.out.println("Fleet Class      : " + fleetClass);
+        System.out.println("Total Bays       : " + totalBays);
+
+        System.out.println("Total Ore Weight : "
+                            + calculateTotalOreWeight()
+                            + " kg");
+
+        System.out.println("Heaviest Ore     : "
+                            + findHeaviestContainer()
+                            + " kg");
+
+        System.out.println("================================");
+    }
+}
+
+
+
+public class OrionMiningSystem
+{
+    public static void main(String[] args)
+    {
+
+        float[][] cargo1 =
+        {
+            {1200.50f, 2500.75f, 1800.25f},
+            {4200.00f, 5100.80f, 900.40f},
+            {3000.10f, 2800.60f, 7500.90f}
+        };
+
+
+        float[][] cargo2 =
+        {
+            {8000.0f, 9200.4f},
+            {1500.5f, 6200.9f},
+            {4300.7f, 2100.8f}
+        };
+
+
+        SpaceVessel[] fleet = new SpaceVessel[2];
+
+
+        fleet[0] = new MiningShip(
+                            (short)1001,
+                            true,
+                            'A',
+                            (byte)3,
+                            cargo1
+                        );
+
+
+        fleet[1] = new MiningShip(
+                            (short)1002,
+                            false,
+                            'B',
+                            (byte)3,
+                            cargo2
+                        );
+
+
+        for(int i = 0; i < fleet.length; i++)
+        {
+            fleet[i].displayVesselInfo();
+        }
+
+
+        long totalFleetValue = 45000000000L;
+
+        System.out.println("\nTotal Fleet Value : "
+                            + totalFleetValue
+                            + " Credits");
+    }
+}
