@@ -1,0 +1,76 @@
+class DNASequencer
+{
+    private StringBuilder dnaSequence;
+
+
+    public DNASequencer(int expectedSize)
+    {
+        dnaSequence = new StringBuilder(expectedSize);
+    }
+
+
+    public void ingestSequence(char[] sensorData)
+    {
+        for(int i = 0; i < sensorData.length; i++)
+        {
+            dnaSequence.append(sensorData[i]);
+        }
+    }
+
+
+    public void mutateDNA(String target,
+                          String replacement)
+    {
+        int index = dnaSequence.indexOf(target);
+
+        if(index != -1)
+        {
+            dnaSequence.replace(
+                    index,
+                    index + target.length(),
+                    replacement
+            );
+        }
+    }
+
+
+    public void displaySequence()
+    {
+        System.out.println(
+                "DNA Sequence : "
+                + dnaSequence.toString()
+        );
+    }
+}
+
+
+
+public class Main
+{
+    public static void main(String[] args)
+    {
+        DNASequencer sequencer =
+                new DNASequencer(100000);
+
+
+        char[] sensorData =
+        {
+            'A', 'C', 'T', 'G',
+            'A', 'A', 'C', 'T',
+            'G', 'G'
+        };
+
+
+        sequencer.ingestSequence(sensorData);
+
+        System.out.println("Original Sequence:");
+        sequencer.displaySequence();
+
+
+        sequencer.mutateDNA("AA", "TT");
+
+
+        System.out.println("\nAfter Mutation:");
+        sequencer.displaySequence();
+    }
+}
