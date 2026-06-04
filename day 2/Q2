@@ -1,0 +1,117 @@
+abstract class DeliveryDrone
+{
+    String droneId;
+
+    DeliveryDrone(String droneId)
+    {
+        this.droneId = droneId;
+    }
+
+    public abstract void deliverPackage();
+}
+
+interface Airborne
+{
+    void flyToDestination();
+
+    default void requestAirTrafficClearance()
+    {
+        System.out.println("Air Traffic Clearance Approved");
+    }
+}
+
+interface GroundBased
+{
+    void navigateSidewalks();
+}
+
+class Quadcopter extends DeliveryDrone implements Airborne
+{
+    Quadcopter(String droneId)
+    {
+        super(droneId);
+    }
+
+    public void flyToDestination()
+    {
+        System.out.println("Quadcopter Flying");
+    }
+
+    public void deliverPackage()
+    {
+        requestAirTrafficClearance();
+        flyToDestination();
+        System.out.println("Package Delivered by Quadcopter");
+    }
+}
+
+class CityRover extends DeliveryDrone implements GroundBased
+{
+    CityRover(String droneId)
+    {
+        super(droneId);
+    }
+
+    public void navigateSidewalks()
+    {
+        System.out.println("City Rover Moving on Roads");
+    }
+
+    public void deliverPackage()
+    {
+        navigateSidewalks();
+        System.out.println("Package Delivered by City Rover");
+    }
+}
+
+class HybridVTOL extends DeliveryDrone
+        implements Airborne, GroundBased
+{
+    HybridVTOL(String droneId)
+    {
+        super(droneId);
+    }
+
+    public void flyToDestination()
+    {
+        System.out.println("Hybrid VTOL Flying");
+    }
+
+    public void navigateSidewalks()
+    {
+        System.out.println("Hybrid VTOL Moving on Ground");
+    }
+
+    public void deliverPackage()
+    {
+        requestAirTrafficClearance();
+        flyToDestination();
+        navigateSidewalks();
+        System.out.println("Package Delivered by Hybrid VTOL");
+    }
+}
+
+public class Main
+{
+    public static void main(String[] args)
+    {
+        Quadcopter q =
+                new Quadcopter("Q101");
+
+        CityRover c =
+                new CityRover("C201");
+
+        HybridVTOL h =
+                new HybridVTOL("H301");
+
+        q.deliverPackage();
+
+        System.out.println();
+
+        c.deliverPackage();
+
+        System.out.println();
+
+        h.deliverPackage();
+    }
+}
