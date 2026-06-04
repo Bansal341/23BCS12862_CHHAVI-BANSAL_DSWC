@@ -1,0 +1,68 @@
+interface PaymentStrategy
+{
+    boolean processPayment(double amount);
+}
+
+class CreditCardStrategy
+        implements PaymentStrategy
+{
+    public boolean processPayment(double amount)
+    {
+        System.out.println(
+                "Payment Done Using Credit Card : "
+                        + amount);
+
+        return true;
+    }
+}
+
+class CryptoStrategy
+        implements PaymentStrategy
+{
+    public boolean processPayment(double amount)
+    {
+        System.out.println(
+                "Payment Done Using Cryptocurrency : "
+                        + amount);
+
+        return true;
+    }
+}
+
+class TransactionProcessor
+{
+    private PaymentStrategy strategy;
+
+    TransactionProcessor(PaymentStrategy strategy)
+    {
+        this.strategy = strategy;
+    }
+
+    public void setPaymentStrategy(
+            PaymentStrategy strategy)
+    {
+        this.strategy = strategy;
+    }
+
+    public void executeTransaction(double amount)
+    {
+        strategy.processPayment(amount);
+    }
+}
+
+public class Main
+{
+    public static void main(String[] args)
+    {
+        TransactionProcessor t =
+                new TransactionProcessor(
+                        new CreditCardStrategy());
+
+        t.executeTransaction(5000);
+
+        t.setPaymentStrategy(
+                new CryptoStrategy());
+
+        t.executeTransaction(12000);
+    }
+}
