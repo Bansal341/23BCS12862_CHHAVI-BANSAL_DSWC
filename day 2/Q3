@@ -1,0 +1,93 @@
+enum DoorState
+{
+    OPEN,
+    CLOSED,
+    LOCKED
+}
+
+class IllegalStateTransitionException
+        extends RuntimeException
+{
+    IllegalStateTransitionException(String message)
+    {
+        super(message);
+    }
+}
+
+class VaultDoor
+{
+    private DoorState state;
+
+    VaultDoor()
+    {
+        state = DoorState.OPEN;
+    }
+
+    public void closeDoor()
+    {
+        if(state == DoorState.OPEN)
+        {
+            state = DoorState.CLOSED;
+            System.out.println("Door Closed");
+        }
+    }
+
+    public void lockDoor()
+    {
+        if(state == DoorState.OPEN)
+        {
+            throw new IllegalStateTransitionException(
+                    "Cannot Lock Door While Open");
+        }
+
+        if(state == DoorState.CLOSED)
+        {
+            state = DoorState.LOCKED;
+            System.out.println("Door Locked");
+        }
+    }
+
+    public void unlockDoor()
+    {
+        if(state == DoorState.LOCKED)
+        {
+            state = DoorState.CLOSED;
+            System.out.println("Door Unlocked");
+        }
+    }
+
+    public void showState()
+    {
+        System.out.println("Current State : " + state);
+    }
+}
+
+public class Main
+{
+    public static void main(String[] args)
+    {
+        VaultDoor v = new VaultDoor();
+
+        v.showState();
+
+        try
+        {
+            v.lockDoor();
+        }
+
+        catch(IllegalStateTransitionException e)
+        {
+            System.out.println(e.getMessage());
+        }
+
+        v.closeDoor();
+
+        v.lockDoor();
+
+        v.showState();
+
+        v.unlockDoor();
+
+        v.showState();
+    }
+}
