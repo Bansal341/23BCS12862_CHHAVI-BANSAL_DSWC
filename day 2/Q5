@@ -1,0 +1,66 @@
+abstract class DataPayload
+{
+    abstract String getRawContent();
+}
+
+class JsonPayload extends DataPayload
+{
+    String data;
+
+    JsonPayload(String data)
+    {
+        this.data = data;
+    }
+
+    String getRawContent()
+    {
+        return data;
+    }
+}
+
+class XmlPayload extends DataPayload
+{
+    String data;
+
+    XmlPayload(String data)
+    {
+        this.data = data;
+    }
+
+    String getRawContent()
+    {
+        return data;
+    }
+}
+
+class PipelineProcessor<T extends DataPayload>
+{
+    public void process(T payload)
+    {
+        System.out.println(
+                "Processing : "
+                        + payload.getRawContent());
+    }
+}
+
+public class Main
+{
+    public static void main(String[] args)
+    {
+        JsonPayload j =
+                new JsonPayload("{name : Rahul}");
+
+        XmlPayload x =
+                new XmlPayload("<name>Rahul</name>");
+
+        PipelineProcessor<JsonPayload> p1 =
+                new PipelineProcessor<>();
+
+        PipelineProcessor<XmlPayload> p2 =
+                new PipelineProcessor<>();
+
+        p1.process(j);
+
+        p2.process(x);
+    }
+}
