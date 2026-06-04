@@ -1,0 +1,135 @@
+abstract class SmartDevice
+{
+    protected String deviceId;
+    protected String deviceName;
+
+    SmartDevice(String deviceId, String deviceName)
+    {
+        this.deviceId = deviceId;
+        this.deviceName = deviceName;
+    }
+
+    public abstract void runDiagnostic();
+}
+
+interface BatteryOperated
+{
+    int getBatteryLevel();
+
+    void triggerRechargeAlert();
+}
+
+class SmartLight extends SmartDevice
+{
+    SmartLight(String deviceId, String deviceName)
+    {
+        super(deviceId, deviceName);
+    }
+
+    public void runDiagnostic()
+    {
+        System.out.println("Checking Smart Light : " + deviceName);
+    }
+}
+
+class SmartCamera extends SmartDevice implements BatteryOperated
+{
+    int batteryLevel;
+
+    SmartCamera(String deviceId, String deviceName, int batteryLevel)
+    {
+        super(deviceId, deviceName);
+        this.batteryLevel = batteryLevel;
+    }
+
+    public void runDiagnostic()
+    {
+        System.out.println("Checking Smart Camera : " + deviceName);
+    }
+
+    public int getBatteryLevel()
+    {
+        return batteryLevel;
+    }
+
+    public void triggerRechargeAlert()
+    {
+        System.out.println("Camera Battery Low");
+    }
+}
+
+class SmartLock extends SmartDevice implements BatteryOperated
+{
+    int batteryLevel;
+
+    SmartLock(String deviceId, String deviceName, int batteryLevel)
+    {
+        super(deviceId, deviceName);
+        this.batteryLevel = batteryLevel;
+    }
+
+    public void runDiagnostic()
+    {
+        System.out.println("Checking Smart Lock : " + deviceName);
+    }
+
+    public int getBatteryLevel()
+    {
+        return batteryLevel;
+    }
+
+    public void triggerRechargeAlert()
+    {
+        System.out.println("Lock Battery Low");
+    }
+}
+
+class HomeHub
+{
+    public void executeNightlyRoutine(SmartDevice[] devices)
+    {
+        for(SmartDevice device : devices)
+        {
+            device.runDiagnostic();
+
+            if(device instanceof BatteryOperated)
+            {
+                BatteryOperated b =
+                        (BatteryOperated) device;
+
+                System.out.println("Battery : "
+                        + b.getBatteryLevel() + "%");
+
+                if(b.getBatteryLevel() < 20)
+                {
+                    b.triggerRechargeAlert();
+                }
+            }
+
+            System.out.println();
+        }
+    }
+}
+
+public class Main
+{
+    public static void main(String[] args)
+    {
+        SmartDevice[] devices = new SmartDevice[3];
+
+        devices[0] =
+                new SmartLight("L1","Hall Light");
+
+        devices[1] =
+                new SmartCamera("C1",
+                        "Security Camera",15);
+
+        devices[2] =
+                new SmartLock("S1",
+                        "Door Lock",50);
+
+        HomeHub h = new HomeHub();
+
+        h.executeNightlyRoutine(devices);
+    }
+}
