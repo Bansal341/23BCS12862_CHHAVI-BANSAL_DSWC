@@ -1,0 +1,52 @@
+import java.util.*;
+import java.util.stream.*;
+
+class Transaction
+{
+    String status;
+    String category;
+    double amount;
+
+    Transaction(String status, String category, double amount)
+    {
+        this.status = status;
+        this.category = category;
+        this.amount = amount;
+    }
+}
+
+class SalesAnalyzer
+{
+    public double calculateElectronicsRevenue(List<Transaction> transactions)
+    {
+        return transactions.stream()
+                .filter(t -> t.status.equals("COMPLETED"))
+                .filter(t -> t.category.equals("ELECTRONICS"))
+                .mapToDouble(t -> t.amount)
+                .sum();
+    }
+}
+
+public class Main
+{
+    public static void main(String[] args)
+    {
+        List<Transaction> transactions = Arrays.asList(
+
+                new Transaction("COMPLETED", "ELECTRONICS", 50000),
+
+                new Transaction("PENDING", "ELECTRONICS", 20000),
+
+                new Transaction("COMPLETED", "FASHION", 10000),
+
+                new Transaction("COMPLETED", "ELECTRONICS", 30000)
+        );
+
+        SalesAnalyzer analyzer = new SalesAnalyzer();
+
+        double revenue =
+                analyzer.calculateElectronicsRevenue(transactions);
+
+        System.out.println(revenue);
+    }
+}
