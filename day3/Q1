@@ -1,0 +1,95 @@
+import java.util.*;
+
+class Passenger
+{
+    String passportNumber;
+    String fullName;
+    String nationality;
+
+    Passenger(String passportNumber, String fullName, String nationality)
+    {
+        this.passportNumber = passportNumber;
+        this.fullName = fullName;
+        this.nationality = nationality;
+    }
+
+    public boolean equals(Object obj)
+    {
+        if(this == obj)
+            return true;
+
+        if(obj == null || getClass() != obj.getClass())
+            return false;
+
+        Passenger p = (Passenger)obj;
+
+        return passportNumber.equals(p.passportNumber) &&
+               nationality.equals(p.nationality);
+    }
+
+    public int hashCode()
+    {
+        return Objects.hash(passportNumber, nationality);
+    }
+}
+
+class ManifestManager
+{
+    Set<Passenger> globalNoFlyList = new HashSet<>();
+
+    Map<String, List<Passenger>> flightRoster = new HashMap<>();
+
+    Map<Passenger, String> globalPassengerDirectory = new HashMap<>();
+
+
+    public void addToNoFlyList(Passenger p)
+    {
+        globalNoFlyList.add(p);
+    }
+
+    public boolean processCheckIn(String flightNumber, Passenger p)
+    {
+        if(globalNoFlyList.contains(p))
+        {
+            return false;
+        }
+
+        flightRoster.putIfAbsent(flightNumber, new ArrayList<>());
+
+        flightRoster.get(flightNumber).add(p);
+
+        globalPassengerDirectory.put(p, flightNumber);
+
+        return true;
+    }
+
+    public String locatePassengerFlight(Passenger p)
+    {
+        return globalPassengerDirectory.get(p);
+    }
+}
+
+public class Main
+{
+    public static void main(String[] args)
+    {
+        ManifestManager manager = new ManifestManager();
+
+        Passenger p1 = new Passenger("P101", "Alice Johnson", "USA");
+        Passenger p2 = new Passenger("P102", "Bob Smith", "India");
+        Passenger p3 = new Passenger("P103", "Charlie Brown", "Canada");
+
+        manager.addToNoFlyList(p3);
+
+        System.out.println(manager.processCheckIn("AI101", p1));
+
+        System.out.println(manager.processCheckIn("AI102", p2));
+
+        System.out.println(manager.processCheckIn("AI103", p3));
+
+        Passenger searchAlice =
+            new Passenger("P101", "Alice ChangedName", "USA");
+
+        System.out.println(manager.locatePassengerFlight(searchAlice));
+    }
+}
