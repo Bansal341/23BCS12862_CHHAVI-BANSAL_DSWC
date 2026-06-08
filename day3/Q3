@@ -1,0 +1,72 @@
+import java.util.concurrent.*;
+import java.util.*;
+
+class Order
+{
+    int orderId;
+    String type;
+    double price;
+    int quantity;
+
+    Order(int orderId, String type, double price, int quantity)
+    {
+        this.orderId = orderId;
+        this.type = type;
+        this.price = price;
+        this.quantity = quantity;
+    }
+
+    public String toString()
+    {
+        return orderId + " " + type + " " + price + " " + quantity;
+    }
+}
+
+class ExchangeManager
+{
+    ConcurrentHashMap<String, CopyOnWriteArrayList<Order>> orderBook =
+            new ConcurrentHashMap<>();
+
+    public void placeOrder(String ticker, Order order)
+    {
+        orderBook
+                .computeIfAbsent(ticker,
+                        k -> new CopyOnWriteArrayList<>())
+                .add(order);
+    }
+
+    public void displayOrders(String ticker)
+    {
+        List<Order> orders = orderBook.get(ticker);
+
+        if(orders != null)
+        {
+            for(Order o : orders)
+            {
+                System.out.println(o);
+            }
+        }
+    }
+}
+
+public class Main
+{
+    public static void main(String[] args)
+    {
+        ExchangeManager manager = new ExchangeManager();
+
+        Order o1 = new Order(101, "BUY", 65000, 2);
+        Order o2 = new Order(102, "SELL", 65200, 1);
+        Order o3 = new Order(103, "BUY", 3000, 5);
+
+        manager.placeOrder("BTC", o1);
+        manager.placeOrder("BTC", o2);
+        manager.placeOrder("ETH", o3);
+
+        manager.displayOrders("BTC");
+
+        System.out.println();
+
+        manager.displayOrders("ETH");
+    }
+}
