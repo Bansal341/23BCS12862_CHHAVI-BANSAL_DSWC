@@ -1,0 +1,70 @@
+import java.util.*;
+
+enum TriageLevel
+{
+    CRITICAL,
+    URGENT,
+    STABLE
+}
+
+class Patient implements Comparable<Patient>
+{
+    String name;
+    TriageLevel severity;
+    long arrivalTime;
+
+    Patient(String name, TriageLevel severity, long arrivalTime)
+    {
+        this.name = name;
+        this.severity = severity;
+        this.arrivalTime = arrivalTime;
+    }
+
+    public int compareTo(Patient p)
+    {
+        if(this.severity != p.severity)
+        {
+            return this.severity.ordinal() - p.severity.ordinal();
+        }
+
+        return Long.compare(this.arrivalTime, p.arrivalTime);
+    }
+}
+
+class TriageManager
+{
+    PriorityQueue<Patient> waitingRoom = new PriorityQueue<>();
+
+    public void admitPatient(Patient p)
+    {
+        waitingRoom.add(p);
+    }
+
+    public Patient getNextPatient()
+    {
+        return waitingRoom.poll();
+    }
+}
+
+public class Main
+{
+    public static void main(String[] args)
+    {
+        TriageManager manager = new TriageManager();
+
+        Patient p1 = new Patient("Rahul", TriageLevel.URGENT, 1002);
+        Patient p2 = new Patient("Aman", TriageLevel.CRITICAL, 1001);
+        Patient p3 = new Patient("Simran", TriageLevel.STABLE, 1003);
+        Patient p4 = new Patient("Karan", TriageLevel.CRITICAL, 1000);
+
+        manager.admitPatient(p1);
+        manager.admitPatient(p2);
+        manager.admitPatient(p3);
+        manager.admitPatient(p4);
+
+        System.out.println(manager.getNextPatient().name);
+        System.out.println(manager.getNextPatient().name);
+        System.out.println(manager.getNextPatient().name);
+        System.out.println(manager.getNextPatient().name);
+    }
+}
