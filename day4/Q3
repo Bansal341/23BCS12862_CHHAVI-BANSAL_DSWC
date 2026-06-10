@@ -1,0 +1,134 @@
+import java.util.*;
+
+abstract class EngineLog {
+
+    String timestamp;
+    double coreTemperature;
+    boolean isAnomaly;
+
+    EngineLog(String timestamp,
+              double coreTemperature,
+              boolean isAnomaly) {
+
+        this.timestamp = timestamp;
+        this.coreTemperature = coreTemperature;
+        this.isAnomaly = isAnomaly;
+    }
+}
+
+class NominalLog extends EngineLog {
+
+    NominalLog(String timestamp,
+               double coreTemperature,
+               boolean isAnomaly) {
+
+        super(timestamp, coreTemperature, isAnomaly);
+    }
+}
+
+class CriticalLog extends EngineLog {
+
+    String errorCode;
+
+    CriticalLog(String timestamp,
+                double coreTemperature,
+                boolean isAnomaly,
+                String errorCode) {
+
+        super(timestamp, coreTemperature, isAnomaly);
+
+        this.errorCode = errorCode;
+    }
+}
+
+@FunctionalInterface
+interface LogAuditor {
+    boolean check(EngineLog log);
+}
+
+@FunctionalInterface
+interface HeatExtractor {
+    double getTemp(EngineLog log);
+}
+
+class TelemetryProcessor {
+
+    public double getPeakCriticalTemp(
+            List<EngineLog> logs,
+            LogAuditor auditor,
+            HeatExtractor extractor) {
+
+        return logs.stream()
+                .filter(log -> auditor.check(log))
+                .mapToDouble(log -> extractor.getTemp(log))
+                .max()
+                .orElse(0.0);
+    }
+}
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        List<EngineLog> logs = new ArrayList<>();
+
+        logs.add(
+                new NominalLog(
+                        "10:00",
+                        5000.0,
+                        false));
+
+        logs.add(
+                new CriticalLog(
+                        "10:05",
+                        8500.0,
+                        false,
+                        "OVERHEAT"));
+
+        logs.add(
+                new CriticalLog(
+                        "10:10",
+                        9200.0,
+                        true,
+                        "TEMP_FAIL"));
+
+        logs.add(
+                new NominalLog(
+                        "10:15",
+                        4500.0,
+                        false));
+
+        LogAuditor auditor = log -> {
+
+            if(log.isAnomaly) {
+                return true;
+            }
+
+            if(log instanceof CriticalLog &&
+               ((CriticalLog)log)
+               .errorCode.equals("OVERHEAT")) {
+
+                return true;
+            }
+
+            return false;
+        };
+
+        HeatExtractor extractor =
+                log -> log.coreTemperature;
+
+        TelemetryProcessor tp =
+                new TelemetryProcessor();
+
+        double maxTemp =
+                tp.getPeakCriticalTemp(
+                        logs,
+                        auditor,
+                        extractor);
+
+        System.out.println(
+                "Peak Critical Temperature: "
+                + maxTemp);
+    }
+}
+
