@@ -1,0 +1,96 @@
+import java.util.*;
+import java.util.stream.*;
+
+abstract class Cargo {
+    String containerId;
+    double valueInCredits;
+    boolean isHazardous;
+
+    Cargo(String containerId, double valueInCredits, boolean isHazardous) {
+        this.containerId = containerId;
+        this.valueInCredits = valueInCredits;
+        this.isHazardous = isHazardous;
+    }
+}
+
+class StandardCargo extends Cargo {
+
+    StandardCargo(String containerId, double valueInCredits, boolean isHazardous) {
+        super(containerId, valueInCredits, isHazardous);
+    }
+}
+
+class BiologicalCargo extends Cargo {
+
+    boolean isShielded;
+
+    BiologicalCargo(String containerId, double valueInCredits,
+                    boolean isHazardous, boolean isShielded) {
+
+        super(containerId, valueInCredits, isHazardous);
+        this.isShielded = isShielded;
+    }
+}
+
+@FunctionalInterface
+interface CargoInspector {
+    boolean check(Cargo c);
+}
+
+@FunctionalInterface
+interface CargoCompressor {
+    String compress(Cargo c);
+}
+
+class ManifestProcessor {
+
+    public List<String> processManifest(List<Cargo> manifest,
+                                        CargoInspector inspector,
+                                        CargoCompressor compressor) {
+
+        return manifest.stream()
+                .filter(c -> inspector.check(c))
+                .filter(c -> c.valueInCredits >= 1000.0)
+                .map(c -> compressor.compress(c))
+                .collect(Collectors.toList());
+    }
+}
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        List<Cargo> manifest = new ArrayList<>();
+
+        manifest.add(new StandardCargo("ALPHA-99", 5000.50, false));
+        manifest.add(new BiologicalCargo("BIOX-11", 7000.00, true, false));
+        manifest.add(new BiologicalCargo("SHLD-77", 9000.00, true, true));
+        manifest.add(new StandardCargo("GAMA-22", 500.00, false));
+
+        CargoInspector inspector = c -> {
+
+            if(c.isHazardous &&
+               c instanceof BiologicalCargo &&
+               !((BiologicalCargo)c).isShielded) {
+
+                return false;
+            }
+
+            return true;
+        };
+
+        CargoCompressor compressor = c ->
+                c.containerId.substring(0, 4)
+                + "-"
+                + (int)c.valueInCredits;
+
+        ManifestProcessor mp = new ManifestProcessor();
+
+        List<String> result =
+                mp.processManifest(manifest, inspector, compressor);
+
+        for(String s : result) {
+            System.out.println(s);
+        }
+    }
+}
