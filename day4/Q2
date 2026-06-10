@@ -1,0 +1,143 @@
+import java.util.*;
+import java.util.stream.*;
+
+abstract class MemoryEngram {
+
+    String engramId;
+    double clarityScore;
+    boolean isCorrupted;
+
+    MemoryEngram(String engramId,
+                 double clarityScore,
+                 boolean isCorrupted) {
+
+        this.engramId = engramId;
+        this.clarityScore = clarityScore;
+        this.isCorrupted = isCorrupted;
+    }
+}
+
+class StandardEngram extends MemoryEngram {
+
+    StandardEngram(String engramId,
+                   double clarityScore,
+                   boolean isCorrupted) {
+
+        super(engramId, clarityScore, isCorrupted);
+    }
+}
+
+class ClassifiedEngram extends MemoryEngram {
+
+    int securityClearanceLevel;
+
+    ClassifiedEngram(String engramId,
+                     double clarityScore,
+                     boolean isCorrupted,
+                     int securityClearanceLevel) {
+
+        super(engramId, clarityScore, isCorrupted);
+
+        this.securityClearanceLevel = securityClearanceLevel;
+    }
+}
+
+@FunctionalInterface
+interface EngramValidator {
+    boolean check(MemoryEngram e);
+}
+
+@FunctionalInterface
+interface EngramTranslator {
+    String translate(MemoryEngram e);
+}
+
+class CortexProcessor {
+
+    public List<String> processMemories(
+            List<MemoryEngram> engrams,
+            EngramValidator validator,
+            EngramTranslator translator) {
+
+        return engrams.stream()
+                .filter(e -> validator.check(e))
+                .filter(e -> e.clarityScore >= 50.0)
+                .map(e -> translator.translate(e))
+                .collect(Collectors.toList());
+    }
+}
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        List<MemoryEngram> engrams = new ArrayList<>();
+
+        engrams.add(
+                new StandardEngram(
+                        "ENG101",
+                        90.0,
+                        false));
+
+        engrams.add(
+                new ClassifiedEngram(
+                        "CLS202",
+                        85.0,
+                        false,
+                        5));
+
+        engrams.add(
+                new ClassifiedEngram(
+                        "CLS303",
+                        70.0,
+                        false,
+                        2));
+
+        engrams.add(
+                new StandardEngram(
+                        "ENG404",
+                        40.0,
+                        false));
+
+        engrams.add(
+                new StandardEngram(
+                        "ENG505",
+                        95.0,
+                        true));
+
+        EngramValidator validator = e -> {
+
+            if(e.isCorrupted) {
+                return false;
+            }
+
+            if(e instanceof ClassifiedEngram &&
+               ((ClassifiedEngram)e)
+               .securityClearanceLevel > 3) {
+
+                return false;
+            }
+
+            return true;
+        };
+
+        EngramTranslator translator = e ->
+                "ENGRAM-"
+                + e.engramId
+                + " | CLARITY: "
+                + e.clarityScore
+                + "%";
+
+        CortexProcessor cp = new CortexProcessor();
+
+        List<String> result =
+                cp.processMemories(
+                        engrams,
+                        validator,
+                        translator);
+
+        for(String s : result) {
+            System.out.println(s);
+        }
+    }
+}
