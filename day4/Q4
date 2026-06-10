@@ -1,0 +1,158 @@
+import java.util.*;
+import java.util.stream.*;
+
+abstract class TemporalEntity {
+
+    String entityName;
+    int originYear;
+
+    TemporalEntity(String entityName,
+                   int originYear) {
+
+        this.entityName = entityName;
+        this.originYear = originYear;
+    }
+}
+
+class HumanEntity extends TemporalEntity {
+
+    HumanEntity(String entityName,
+                int originYear) {
+
+        super(entityName, originYear);
+    }
+}
+
+class ArtifactEntity extends TemporalEntity {
+
+    boolean isRadioactive;
+
+    ArtifactEntity(String entityName,
+                   int originYear,
+                   boolean isRadioactive) {
+
+        super(entityName, originYear);
+
+        this.isRadioactive = isRadioactive;
+    }
+}
+
+class HistoricalEvent {
+
+    List<TemporalEntity> entities;
+    int eventYear;
+
+    HistoricalEvent(List<TemporalEntity> entities,
+                    int eventYear) {
+
+        this.entities = entities;
+        this.eventYear = eventYear;
+    }
+}
+
+@FunctionalInterface
+interface ParadoxChecker {
+
+    boolean check(TemporalEntity entity,
+                  int eventYear);
+}
+
+@FunctionalInterface
+interface ThreatMapper {
+
+    String map(TemporalEntity entity);
+}
+
+class ParadoxAnalyzer {
+
+    public List<String> detectParadoxes(
+            List<HistoricalEvent> timeline,
+            ParadoxChecker checker,
+            ThreatMapper mapper) {
+
+        return timeline.stream()
+
+                .flatMap(event ->
+                        event.entities.stream()
+
+                        .filter(entity ->
+                                checker.check(
+                                        entity,
+                                        event.eventYear))
+
+                        .map(entity ->
+                                mapper.map(entity))
+                )
+
+                .collect(Collectors.toList());
+    }
+}
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        List<HistoricalEvent> timeline =
+                new ArrayList<>();
+
+        List<TemporalEntity> event1 =
+                new ArrayList<>();
+
+        event1.add(
+                new HumanEntity(
+                        "John",
+                        2050));
+
+        event1.add(
+                new ArtifactEntity(
+                        "Ancient Orb",
+                        1800,
+                        true));
+
+        timeline.add(
+                new HistoricalEvent(
+                        event1,
+                        2000));
+
+        List<TemporalEntity> event2 =
+                new ArrayList<>();
+
+        event2.add(
+                new HumanEntity(
+                        "Sarah",
+                        1990));
+
+        event2.add(
+                new ArtifactEntity(
+                        "Future Core",
+                        3000,
+                        false));
+
+        timeline.add(
+                new HistoricalEvent(
+                        event2,
+                        2025));
+
+        ParadoxChecker checker =
+                (entity, year) ->
+                        entity.originYear > year;
+
+        ThreatMapper mapper =
+                entity ->
+                        entity.entityName
+                        + " detected out of time!";
+
+        ParadoxAnalyzer analyzer =
+                new ParadoxAnalyzer();
+
+        List<String> result =
+                analyzer.detectParadoxes(
+                        timeline,
+                        checker,
+                        mapper);
+
+        for(String s : result) {
+            System.out.println(s);
+        }
+    }
+}
