@@ -1,0 +1,159 @@
+import java.util.*;
+import java.util.stream.*;
+
+abstract class DNASample {
+
+    String sampleId;
+    double purityPercentage;
+
+    DNASample(String sampleId,
+              double purityPercentage) {
+
+        this.sampleId = sampleId;
+        this.purityPercentage = purityPercentage;
+    }
+}
+
+class HumanSample extends DNASample {
+
+    String bloodType;
+
+    HumanSample(String sampleId,
+                double purityPercentage,
+                String bloodType) {
+
+        super(sampleId, purityPercentage);
+
+        this.bloodType = bloodType;
+    }
+}
+
+class AlienSample extends DNASample {
+
+    boolean isSiliconBased;
+
+    AlienSample(String sampleId,
+                double purityPercentage,
+                boolean isSiliconBased) {
+
+        super(sampleId, purityPercentage);
+
+        this.isSiliconBased = isSiliconBased;
+    }
+}
+
+@FunctionalInterface
+interface ViabilityChecker {
+
+    boolean check(DNASample sample);
+}
+
+@FunctionalInterface
+interface GenomeMapper {
+
+    String map(DNASample sample);
+}
+
+class Sequencer {
+
+    public Map<String, List<String>> classifyGenomes(
+            List<DNASample> samples,
+            ViabilityChecker checker,
+            GenomeMapper mapper) {
+
+        return samples.stream()
+
+                .filter(sample ->
+                        checker.check(sample))
+
+                .collect(
+                        Collectors.groupingBy(
+
+                                sample ->
+                                        sample.getClass()
+                                        .getSimpleName(),
+
+                                Collectors.mapping(
+
+                                        sample ->
+                                                mapper.map(sample),
+
+                                        Collectors.toList()
+                                )
+                        )
+                );
+    }
+}
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        List<DNASample> samples =
+                new ArrayList<>();
+
+        samples.add(
+                new HumanSample(
+                        "001",
+                        90.0,
+                        "O+"));
+
+        samples.add(
+                new HumanSample(
+                        "002",
+                        70.0,
+                        "A-"));
+
+        samples.add(
+                new AlienSample(
+                        "003",
+                        95.0,
+                        true));
+
+        samples.add(
+                new AlienSample(
+                        "004",
+                        82.0,
+                        false));
+
+        ViabilityChecker checker =
+                sample ->
+                        sample.purityPercentage >= 80.0;
+
+        GenomeMapper mapper =
+                sample -> {
+
+                    if(sample instanceof HumanSample) {
+
+                        HumanSample h =
+                                (HumanSample) sample;
+
+                        return "ID: "
+                                + h.sampleId
+                                + " (Type: "
+                                + h.bloodType
+                                + ")";
+                    }
+
+                    AlienSample a =
+                            (AlienSample) sample;
+
+                    return "ID: "
+                            + a.sampleId
+                            + " (Silicon: "
+                            + a.isSiliconBased
+                            + ")";
+                };
+
+        Sequencer s =
+                new Sequencer();
+
+        Map<String, List<String>> result =
+                s.classifyGenomes(
+                        samples,
+                        checker,
+                        mapper);
+
+        System.out.println(result);
+    }
+}
