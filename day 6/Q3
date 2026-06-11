@@ -1,0 +1,115 @@
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Component;
+
+interface PaymentProcessor
+{
+    void processPayment(double amount);
+}
+
+@Component
+@Primary
+class StripeProcessor implements PaymentProcessor
+{
+    @Override
+    public void processPayment(double amount)
+    {
+        System.out.println("Stripe Payment: " + amount);
+    }
+}
+
+@Component
+class SquareProcessor implements PaymentProcessor
+{
+    @Override
+    public void processPayment(double amount)
+    {
+        System.out.println("Square Payment: " + amount);
+    }
+}
+
+class BankXmlProcessor implements PaymentProcessor
+{
+    private String endpoint;
+    private String apiKey;
+    private String region;
+    private int timeout;
+    private boolean secureMode;
+
+    public BankXmlProcessor(String endpoint,
+                            String apiKey,
+                            String region,
+                            int timeout,
+                            boolean secureMode)
+    {
+        this.endpoint = endpoint;
+        this.apiKey = apiKey;
+        this.region = region;
+        this.timeout = timeout;
+        this.secureMode = secureMode;
+    }
+
+    @Override
+    public void processPayment(double amount)
+    {
+        System.out.println("Bank XML Payment: " + amount);
+    }
+}
+
+@Component("bankXmlProcessor")
+class BankXmlProcessorFactoryBean
+        implements FactoryBean<BankXmlProcessor>
+{
+    @Override
+    public BankXmlProcessor getObject()
+    {
+        String endpoint = "https://bank-api.com";
+        String apiKey = "BANK123";
+        String region = "INDIA";
+        int timeout = 5000;
+        boolean secureMode = true;
+
+        return new BankXmlProcessor(
+                endpoint,
+                apiKey,
+                region,
+                timeout,
+                secureMode
+        );
+    }
+
+    @Override
+    public Class<?> getObjectType()
+    {
+        return BankXmlProcessor.class;
+    }
+
+    @Override
+    public boolean isSingleton()
+    {
+        return true;
+    }
+}
+
+@Component
+class CheckoutService
+{
+    private final PaymentProcessor defaultProcessor;
+    private final PaymentProcessor bankProcessor;
+
+    public CheckoutService(
+            PaymentProcessor defaultProcessor,
+            @Qualifier("bankXmlProcessor")
+            PaymentProcessor bankProcessor)
+    {
+        this.defaultProcessor = defaultProcessor;
+        this.bankProcessor = bankProcessor;
+    }
+
+    public void checkout(double amount)
+    {
+        defaultProcessor.processPayment(amount);
+        bankProcessor.processPayment(amount);
+    }
+}
