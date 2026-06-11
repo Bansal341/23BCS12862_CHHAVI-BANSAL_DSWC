@@ -1,0 +1,66 @@
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
+
+@Component
+@Lazy
+class ImageRenderingEngine
+{
+    public ImageRenderingEngine()
+    {
+        System.out.println("ImageRenderingEngine Initialized");
+    }
+
+    public void renderImage()
+    {
+        System.out.println("Rendering MRI Image");
+    }
+}
+
+@Component
+@Scope("prototype")
+class PatientContext
+{
+    private String patientId;
+
+    public void setPatientId(String patientId)
+    {
+        this.patientId = patientId;
+    }
+
+    public String getPatientId()
+    {
+        return patientId;
+    }
+}
+
+@Component
+class ScanOrchestrator
+{
+    private final ImageRenderingEngine imageRenderingEngine;
+    private final ObjectProvider<PatientContext> patientContextProvider;
+
+    public ScanOrchestrator(
+            ImageRenderingEngine imageRenderingEngine,
+            ObjectProvider<PatientContext> patientContextProvider)
+    {
+        this.imageRenderingEngine = imageRenderingEngine;
+        this.patientContextProvider = patientContextProvider;
+    }
+
+    public void processScan(String patientId)
+    {
+        PatientContext patientContext =
+                patientContextProvider.getObject();
+
+        patientContext.setPatientId(patientId);
+
+        System.out.println(
+                "Processing scan for patient: "
+                        + patientContext.getPatientId()
+        );
+
+        imageRenderingEngine.renderImage();
+    }
+}
