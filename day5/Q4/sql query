@@ -1,0 +1,28 @@
+WITH latest_pings AS
+(
+    SELECT
+        ping_id,
+        rider_id,
+        latitude,
+        longitude,
+        recorded_at,
+        ROW_NUMBER() OVER
+        (
+            PARTITION BY rider_id
+            ORDER BY recorded_at DESC
+        ) AS rn
+    FROM gps_pings
+)
+SELECT
+    r.rider_name,
+    r.bike_model,
+    lp.latitude,
+    lp.longitude,
+    lp.recorded_at
+FROM riders r
+INNER JOIN latest_pings lp
+ON r.rider_id = lp.rider_id
+WHERE lp.rn = 1;
+
+CREATE INDEX idx_gps_pings_rider_timestamp
+ON gps_pings (rider_id, recorded_at DESC);
